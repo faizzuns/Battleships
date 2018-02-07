@@ -20,7 +20,7 @@ def main(player_key):
         state = json.load(f_in)
     map_size = state['MapDimension']
     if state['Phase'] == 1:
-        place_ships()
+        place_ships(map_size)
     else:
         fire_shot(state['OpponentMap']['Cells'])
 
@@ -53,17 +53,32 @@ def fire_shot(opponent_map):
     return
 
 
-def place_ships():
+def place_ships(map_size):
     # Please place your ships in the following format <Shipname> <x> <y> <direction>
     # Ship names: Battleship, Cruiser, Carrier, Destroyer, Submarine
     # Directions: north east south west
 
-    ships = ['Battleship 1 0 north',
-             'Carrier 3 1 East',
-             'Cruiser 4 2 north',
-             'Destroyer 7 3 north',
-             'Submarine 1 8 East'
-             ]
+    if (map_size == 7)
+        ships = ['Battleship 0 4 East',
+                 'Carrier 6 2 north',
+                 'Cruiser 1 0 north',
+                 'Destroyer 1 6 East',
+                 'Submarine 3 1 East'
+                 ]
+    else if (map_size == 10)
+        ships = ['Battleship 2 6 East',
+                 'Carrier 8 4 north',
+                 'Cruiser 1 2 north',
+                 'Destroyer 1 8 East',
+                 'Submarine 6 1 East'
+                 ]
+    else
+        ships = ['Battleship 5 7 East',
+                 'Carrier 11 12 south',
+                 'Cruiser 2 3 north',
+                 'Destroyer 3 10 East',
+                 'Submarine 9 2 East'
+                 ]
 
     with open(os.path.join(output_path, place_ship_file), 'w') as f_out:
         for ship in ships:
