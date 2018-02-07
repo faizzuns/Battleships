@@ -10,6 +10,7 @@ place_ship_file = "place.txt"
 game_state_file = "state.json"
 output_path = '.'
 map_size = 0
+count = 0
 
 
 def main(player_key):
@@ -41,7 +42,7 @@ def fire_shot(opponent_map):
 		valid_cell = cell['X'], cell['Y']
         targets.append(valid_cell)
         #if not cell['Damaged'] and not cell['Missed']:
-           
+
 	#pprint(targets)
 	with open('target.txt', 'w') as f:
 		res = json.dumps({'targets' : targets})
