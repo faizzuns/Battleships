@@ -39,15 +39,9 @@ def fire_shot(opponent_map):
     #  code 1 is your choice)
     targets = []
     for cell in opponent_map:
-		valid_cell = cell['X'], cell['Y']
-        targets.append(valid_cell)
-        #if not cell['Damaged'] and not cell['Missed']:
-
-	#pprint(targets)
-	with open('target.txt', 'w') as f:
-		res = json.dumps({'targets' : targets})
-		f.write(res)
-		f.close()
+        if not cell['Damaged'] and not cell['Missed']:
+            valid_cell = cell['X'], cell['Y']
+            targets.append(valid_cell)
     target = choice(targets)
     output_shot(*target)
     return
