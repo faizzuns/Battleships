@@ -37,6 +37,13 @@ def fire_shot(opponent_map):
     # To send through a command please pass through the following <code>,<x>,<y>
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
     #  code 1 is your choice)
+    if (map_size == 7)
+
+    else if (map_size == 10)
+        
+    else
+
+
     targets = []
     for cell in opponent_map:
         if not cell['Damaged'] and not cell['Missed']:
@@ -47,7 +54,7 @@ def fire_shot(opponent_map):
     return
 
 
-def place_ships(map_size):
+def place_ships():
     # Please place your ships in the following format <Shipname> <x> <y> <direction>
     # Ship names: Battleship, Cruiser, Carrier, Destroyer, Submarine
     # Directions: north east south west
