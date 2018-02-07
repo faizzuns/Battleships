@@ -56,6 +56,34 @@ def fire_shot(opponent_map):
                  (9,0),(8,5),(4,3),(1,4),(3,8),(5,12),(6,9),(11,8),(7,0),(6,3),
                  (12,1),(12,3),(1,8),(12,5),(9,6),(4,9),(9,8),(9,10)]
 
+    shotsDummy = shots
+    for shot in shotsDummy:
+        cell = searchCell(opponent_map, shot[0], shot[1])
+        if (cell['Missed']):
+            shots.remove(shot)
+        elif cell['Damaged']:
+            if (shot[1]+1 != map_size):
+                myCell = searchCell(opponent_map, shot[0], shot[1]+1)
+                if (not(myCell['Damaged']) and not(myCell['Missed'])):
+                    myShot = shot[0],shot[1]+1
+                    shots.insert(0,myShot)
+            if (shot[1] != 0):
+                myCell = searchCell(opponent_map, shot[0], shot[1]-1)
+                if (not(myCell['Damaged']) and not(myCell['Missed'])):
+                    myShot = shot[0],shot[1]-1
+                    shots.insert(0,myShot)
+            if (shot[0] != 0):
+                myCell = searchCell(opponent_map, shot[0]-1, shot[1])
+                if (not(myCell['Damaged']) and not(myCell['Missed'])):
+                    myShot = shot[0]-1,shot[1]
+                    shots.insert(0,myShot)
+            if (shot[0]+1 != map_size):
+                myCell = searchCell(opponent_map, shot[0]+1, shot[1])
+                if (not(myCell['Damaged']) and not(myCell['Missed'])):
+                    myShot = shot[0]+1,shot[1]
+                    shots.insert(0,myShot)
+            shots.remove(shot)
+
     i = 0
     check = False
     while (i<len(shots) and not(check)):
@@ -77,6 +105,11 @@ def fire_shot(opponent_map):
         output_shot(0,0,0)
     return
 
+
+def searchCell(opponent_map, x, y):
+    for cell in opponent_map:
+        if ((cell['X']==x) and (cell['Y']==y)):
+            return cell
 
 def place_ships():
     # Please place your ships in the following format <Shipname> <x> <y> <direction>
