@@ -17,22 +17,12 @@ def main(player_key):
         state = json.load(f_in)
     map_size = state['MapDimension']
     if state['Phase'] == 1:
+        initShots()
         place_ships()
     else:
         fire_shot(state['OpponentMap']['Cells'])
 
-
-def output_shot(cmd, x, y):
-    with open(os.path.join(output_path, command_file), 'w') as f_out:
-        f_out.write('{},{},{}'.format(cmd, x, y))
-        f_out.write('\n')
-    pass
-
-
-def fire_shot(opponent_map):
-    # To send through a command please pass through the following <code>,<x>,<y>
-    # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
-    #  code 1 is your choice)
+def initShots():
     if (map_size == 7):
         shots = [(3,3), (1,5), (5,5), (5,1), (1,1), (4,4), (2,2), (4,2), (2,4),
                  (0,4), (3,1), (6,2), (3,5), (0,6), (6,6), (5,3), (1,3), (2,0),
@@ -55,6 +45,28 @@ def fire_shot(opponent_map):
                  (5,2),(7,10),(0,7),(0,11),(11,4),(8,7),(8,11),(13,10),(2,13),(2,3),
                  (9,0),(8,5),(4,3),(1,4),(3,8),(5,12),(6,9),(11,8),(7,0),(6,3),
                  (12,1),(12,3),(1,8),(12,5),(9,6),(4,9),(9,8),(9,10)]
+    with open('shots.txt', 'w') as f:
+        for shot in shots :
+            f.write(str(shot[0]))
+            f.write(",")
+            f.write(str(shot[1]))
+            f.write("\n")
+
+
+def output_shot(cmd, x, y):
+    with open(os.path.join(output_path, command_file), 'w') as f_out:
+        f_out.write('{},{},{}'.format(cmd, x, y))
+        f_out.write('\n')
+    pass
+
+
+def fire_shot(opponent_map):
+    # To send through a command please pass through the following <code>,<x>,<y>
+    # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
+    #  code 1 is your choice)
+    with open('shots.txt', 'r') as f:
+        shots = [tuple(map(int, shot.split(','))) for shot in f]
+
 
     i = 0
     check = False
@@ -75,6 +87,13 @@ def fire_shot(opponent_map):
         output_shot(1,shots[i][0],shots[i][1])
     else:
         output_shot(0,0,0)
+
+    with open('shots.txt', 'w') as f:
+        for shot in shots :
+            f.write(str(shot[0]))
+            f.write(",")
+            f.write(str(shot[1]))
+            f.write("\n")
     return
 
 
