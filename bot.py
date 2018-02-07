@@ -20,7 +20,41 @@ def main(player_key):
         initShots()
         place_ships()
     else:
+        #if state['PlayerMap']['Owner']['Shield']['CurrentCharges']==4 and not(state['PlayerMap']['Owner']['Shield']['Active']):
+            #applyshield()
+        #else:
         fire_shot(state['OpponentMap']['Cells'])
+
+# def applyshield():
+#     if not(state['PlayerMap']['Owner']['Ships']['1']['Destroyed']):
+#         # x = state['PlayerMap']['Owner']['Ships'][1]['Cells'][0]['X']
+#         # y = state['PlayerMap']['Owner']['Ships'][1]['Cells'][0]['Y']
+#         x = 2
+#         y = 2
+#     elif not(state['PlayerMap']['Owner']['Ships']['3']['Destroyed']):
+#         # x = state['PlayerMap']['Owner']['Ships'][3]['Cells'][2]['X']
+#         # y = state['PlayerMap']['Owner']['Ships'][3]['Cells'][2]['Y']
+#         x = 2
+#         y = 2
+#     elif not(state['PlayerMap']['Owner']['Ships']['4']['Destroyed']):
+#         # x = state['PlayerMap']['Owner']['Ships'][4]['Cells'][1]['X']
+#         # y = state['PlayerMap']['Owner']['Ships'][4]['Cells'][1]['Y']
+#         x = 2
+#         y = 2
+#     elif not(state['PlayerMap']['Owner']['Ships']['2']['Destroyed']):
+#         # x = state['PlayerMap']['Owner']['Ships'][2]['Cells'][1]['X']
+#         # y = state['PlayerMap']['Owner']['Ships'][2]['Cells'][1]['Y']
+#         x = 2
+#         y = 2
+#     elif not(state['PlayerMap']['Owner']['Ships']['0']['Destroyed']):
+#         # x = state['PlayerMap']['Owner']['Ships'][0]['Cells'][1]['X']
+#         # y = state['PlayerMap']['Owner']['Ships'][0]['Cells'][1]['Y']
+#         x = 2
+#         y = 2
+#     else:
+#         x = 2
+#         y = 2
+#     output_shot(8,x,y)
 
 def initShots():
     if (map_size == 7):
@@ -67,7 +101,7 @@ def fire_shot(opponent_map):
     with open('shots.txt', 'r') as f:
         shots = [tuple(map(int, shot.split(','))) for shot in f]
 
-    shotsDummy = shots
+    shotsDummy = list(shots)
     for shot in shotsDummy:
         cell = searchCell(opponent_map, shot[0], shot[1])
         if (cell['Missed']):
