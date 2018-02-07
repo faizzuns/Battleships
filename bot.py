@@ -67,35 +67,6 @@ def fire_shot(opponent_map):
     with open('shots.txt', 'r') as f:
         shots = [tuple(map(int, shot.split(','))) for shot in f]
 
-
-    shotsDummy = shots
-    for shot in shotsDummy:
-        cell = searchCell(opponent_map, shot[0], shot[1])
-        if (cell['Missed']):
-            shots.remove(shot)
-        elif cell['Damaged']:
-            if (shot[1]+1 != map_size):
-                myCell = searchCell(opponent_map, shot[0], shot[1]+1)
-                if (not(myCell['Damaged']) and not(myCell['Missed'])):
-                    myShot = shot[0],shot[1]+1
-                    shots.insert(0,myShot)
-            if (shot[1] != 0):
-                myCell = searchCell(opponent_map, shot[0], shot[1]-1)
-                if (not(myCell['Damaged']) and not(myCell['Missed'])):
-                    myShot = shot[0],shot[1]-1
-                    shots.insert(0,myShot)
-            if (shot[0] != 0):
-                myCell = searchCell(opponent_map, shot[0]-1, shot[1])
-                if (not(myCell['Damaged']) and not(myCell['Missed'])):
-                    myShot = shot[0]-1,shot[1]
-                    shots.insert(0,myShot)
-            if (shot[0]+1 != map_size):
-                myCell = searchCell(opponent_map, shot[0]+1, shot[1])
-                if (not(myCell['Damaged']) and not(myCell['Missed'])):
-                    myShot = shot[0]+1,shot[1]
-                    shots.insert(0,myShot)
-            shots.remove(shot)
-
     shotsDummy = shots
     for shot in shotsDummy:
         cell = searchCell(opponent_map, shot[0], shot[1])
