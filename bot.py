@@ -20,7 +20,35 @@ def main(player_key):
         initShots()
         place_ships()
     else:
-        fire_shot(state['OpponentMap']['Cells'])
+        print(state['PlayerMap']['Owner']['Shield']['CurrentCharges'])
+        print(state['PlayerMap']['Owner']['Ships'][1]['Destroyed'])
+        if (state['PlayerMap']['Owner']['Shield']['CurrentCharges'] == 4 and not(state['PlayerMap']['Owner']['Shield']['Active'])):
+            applyShield(state)
+        else:
+            fire_shot(state['OpponentMap']['Cells'])
+
+def applyShield(state):
+
+    if not(state['PlayerMap']['Owner']['Ships'][1]['Destroyed']):
+        x = state['PlayerMap']['Owner']['Ships'][1]['Cells'][1]['X']
+        y = state['PlayerMap']['Owner']['Ships'][1]['Cells'][1]['Y']-1
+    elif not(state['PlayerMap']['Owner']['Ships'][2]['Destroyed']):
+        x = state['PlayerMap']['Owner']['Ships'][2]['Cells'][2]['X']
+        y = state['PlayerMap']['Owner']['Ships'][2]['Cells'][2]['Y']
+    elif not(state['PlayerMap']['Owner']['Ships'][3]['Destroyed']):
+        x = state['PlayerMap']['Owner']['Ships'][3]['Cells'][3]['X']
+        y = state['PlayerMap']['Owner']['Ships'][3]['Cells'][3]['Y']
+    elif not(state['PlayerMap']['Owner']['Ships'][4]['Destroyed']):
+        x = state['PlayerMap']['Owner']['Ships'][4]['Cells'][1]['X']
+        y = state['PlayerMap']['Owner']['Ships'][4]['Cells'][1]['Y']
+    elif not(state['PlayerMap']['Owner']['Ships'][0]['Destroyed']):
+        x = state['PlayerMap']['Owner']['Ships'][0]['Cells'][1]['X']
+        y = state['PlayerMap']['Owner']['Ships'][0]['Cells'][1]['Y']
+    else:
+        x=2
+        y=2
+
+    output_shot(8,x,y)
 
 def initShots():
     if (map_size == 7):
