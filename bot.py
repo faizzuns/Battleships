@@ -45,8 +45,8 @@ def applyShield(state):
         x = state['PlayerMap']['Owner']['Ships'][0]['Cells'][1]['X']
         y = state['PlayerMap']['Owner']['Ships'][0]['Cells'][1]['Y']
     else:
-        x=2
-        y=2
+        x=4
+        y=6
 
     output_shot(8,x,y)
 
