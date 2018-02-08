@@ -8,14 +8,24 @@ place_ship_file = "place.txt"
 game_state_file = "state.json"
 output_path = '.'
 map_size = 0
-
+epr = 3
 
 def main(player_key):
     global map_size
+    global epr
     # Retrieve current game state
     with open(os.path.join(output_path, game_state_file), 'r') as f_in:
         state = json.load(f_in)
+
+    #inisialisasi mapsize dan energy per round
     map_size = state['MapDimension']
+    if map_size == 7:
+        epr = 2
+    elif map_size == 10:
+        epr = 3
+    else:
+        epr = 4
+
     if state['Phase'] == 1:
         initShots()
         place_ships()
@@ -25,7 +35,7 @@ def main(player_key):
         if (state['PlayerMap']['Owner']['Shield']['CurrentCharges'] == 4 and not(state['PlayerMap']['Owner']['Shield']['Active'])):
             applyShield(state)
         else:
-            fire_shot(state['OpponentMap']['Cells'])
+            fire_shot(state['OpponentMap']['Cells'], state['PlayerMap']['Owner'])
 
 def applyShield(state):
 
@@ -87,14 +97,39 @@ def output_shot(cmd, x, y):
         f_out.write('\n')
     pass
 
+def check_special(opponent_map, Owner, shots):
+    if Owner['Energy']>=(8*epr) and not(Owner['Ships'][1]['Destroyed']) :
+        if shots[0][0]==shots[1][0] and abs(shots[0][1]-shots[1][1])==2:
+            x = shots[0][0]
+            if shots[0][1]>shots[1][1]:
+                y = shots[0][1]-1
+            else:
+                y = shots[0][1]+1
+            return (2,x,y)
+        elif shots[0][1]==shots[1][1] and abs(shots[0][0]-shots[1][0])==2:
+            y = shots[0][1]
+            if shots[0][0]>shots[1][0]:
+                x = shots[0][0]-1
+            else:
+                x = shots[0][0]+1
+            return (3,x,y)
+    if Owner['Energy']>=(10*epr) and not(Owner['Ships'][3]['Destroyed']):
+        if (map_size==7):
+            if (shots[0][0]+shots[0][1])%2==0:
+                return (4,shots[0][0],shots[0][1])
+        else:
+            if (shots[0][0]+shots[0][1])%2==1:
+                return (4,shots[0][0],shots[0][1])
+    return (0,0,0)
 
-def fire_shot(opponent_map):
+def fire_shot(opponent_map, Owner):
     # To send through a command please pass through the following <code>,<x>,<y>
     # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
     #  code 1 is your choice)
     with open('shots.txt', 'r') as f:
         shots = [tuple(map(int, shot.split(','))) for shot in f]
 
+    #Mengupdate list shots
     shotsDummy = list(shots)
     for shot in shotsDummy:
         cell = searchCell(opponent_map, shot[0], shot[1])
@@ -123,25 +158,30 @@ def fire_shot(opponent_map):
                     shots.insert(0,myShot)
             shots.remove(shot)
 
-    i = 0
-    check = False
-    while (i<len(shots) and not(check)):
-        x = shots[i][0]
-        y = shots[i][1]
-
-        for cell in opponent_map:
-            if ((cell['X']==x) and (cell['Y']==y)):
-                if not(cell['Damaged']) and not(cell['Missed']) and not(cell['ShieldHit']) :
-                    check = True
-                break
-        if not(check) :
-            i+=1
-
-    if check :
-        target = shots[i]
-        output_shot(1,shots[i][0],shots[i][1])
+    tryspecial = check_special(opponent_map, Owner, shots)
+    if tryspecial!=(0,0,0):
+        output_shot(tryshot[0],tryshot[1],tryshot[2])
     else:
-        output_shot(0,0,0)
+        #Menembak single shot
+        i = 0
+        check = False
+        while (i<len(shots) and not(check)):
+            x = shots[i][0]
+            y = shots[i][1]
+
+            for cell in opponent_map:
+                if ((cell['X']==x) and (cell['Y']==y)):
+                    if not(cell['Damaged']) and not(cell['Missed']) and not(cell['ShieldHit']) :
+                        check = True
+                    break
+            if not(check) :
+                i+=1
+
+        if check :
+            target = shots[i]
+            output_shot(1,shots[i][0],shots[i][1])
+        else:
+            output_shot(0,0,0)
 
     with open('shots.txt', 'w') as f:
         for shot in shots :
