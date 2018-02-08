@@ -95,7 +95,7 @@ def fire_shot(opponent_map):
     with open('shots.txt', 'r') as f:
         shots = [tuple(map(int, shot.split(','))) for shot in f]
 
-    shotsDummy = shots
+    shotsDummy = list(shots)
     for shot in shotsDummy:
         cell = searchCell(opponent_map, shot[0], shot[1])
         if (cell['Missed']):
