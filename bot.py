@@ -3,42 +3,43 @@ import json
 import os
 from random import choice
 
-command_file = "command.txt"
-place_ship_file = "place.txt"
-game_state_file = "state.json"
-output_path = '.'
-map_size = 0
-epr = 3
+commandFile = "command.txt" #command placement
+shipFile = "place.txt" #ship placement location
+stateFile = "state.json" #current game state
+gameengine_path = '.' #Untuk directory game engine
+mapsize = 0 #Ukuran Peta
+epr = 3 #Energy Per Round
 
 def main(player_key):
-    global map_size
+    #Fungsi utama dari bot
+    global mapsize
     global epr
-    # Retrieve current game state
-    with open(os.path.join(output_path, game_state_file), 'r') as f_in:
+    # Membaca current state game
+    with open(os.path.join(gameengine_path, stateFile), 'r') as f_in:
         state = json.load(f_in)
 
     #inisialisasi mapsize dan energy per round
-    map_size = state['MapDimension']
-    if map_size == 7:
+    mapsize = state['MapDimension']
+    if mapsize == 7:
         epr = 2
-    elif map_size == 10:
+    elif mapsize == 10:
         epr = 3
     else:
         epr = 4
 
+    #Melakukan aksi sesuai phase
     if state['Phase'] == 1:
         initShots()
-        place_ships()
+        placeShips()
     else:
-        print(state['PlayerMap']['Owner']['Shield']['CurrentCharges'])
-        print(state['PlayerMap']['Owner']['Ships'][1]['Destroyed'])
         if (state['PlayerMap']['Owner']['Shield']['CurrentCharges'] == 4 and not(state['PlayerMap']['Owner']['Shield']['Active'])):
+            #jika energi cukup, menyalakan shield
             applyShield(state)
         else:
-            fire_shot(state['OpponentMap']['Cells'], state['PlayerMap']['Owner'])
+            shotCommand(state['OpponentMap']['Cells'], state['PlayerMap']['Owner'])
 
 def applyShield(state):
-
+    #Fungsi yang mengaktifkan shield sesuai kapal yang ingin dilindungi
     if not(state['PlayerMap']['Owner']['Ships'][1]['Destroyed']):
         x = state['PlayerMap']['Owner']['Ships'][1]['Cells'][1]['X']
         y = state['PlayerMap']['Owner']['Ships'][1]['Cells'][1]['Y']-1
@@ -58,14 +59,15 @@ def applyShield(state):
         x=4
         y=6
 
-    output_shot(8,x,y)
+    writeCommand(8,x,y)
 
 def initShots():
-    if (map_size == 7):
+    #Menginisialisasi target utama secara manual sesuai ukuran peta
+    if (mapsize == 7):
         shots = [(3,3), (1,5), (5,5), (5,1), (1,1), (4,4), (2,2), (4,2), (2,4),
                  (0,4), (3,1), (6,2), (3,5), (0,6), (6,6), (5,3), (1,3), (2,0),
                  (4,0), (2,6), (6,4), (0,0), (4,6), (6,0), (0,2)]
-    elif (map_size == 10):
+    elif (mapsize == 10):
         shots = [(4,5), (6,7), (5,2), (1,6), (6,9), (9,2), (2,1), (7,6), (5,4),
                  (9,0), (3,8), (1,2), (8,3), (7,8), (1,8), (6,1), (0,9), (9,6),
                  (6,5), (3,2), (1,4), (8,1), (4,9), (9,4), (3,6), (9,8), (0,3),
@@ -83,6 +85,7 @@ def initShots():
                  (5,2),(7,10),(0,7),(0,11),(11,4),(8,7),(8,11),(13,10),(2,13),(2,3),
                  (9,0),(8,5),(4,3),(1,4),(3,8),(5,12),(6,9),(11,8),(7,0),(6,3),
                  (12,1),(12,3),(1,8),(12,5),(9,6),(4,9),(9,8),(9,10)]
+    #menaruh shots kedalam file shots.txt
     with open('shots.txt', 'w') as f:
         for shot in shots :
             f.write(str(shot[0]))
@@ -91,13 +94,16 @@ def initShots():
             f.write("\n")
 
 
-def output_shot(cmd, x, y):
-    with open(os.path.join(output_path, command_file), 'w') as f_out:
+def writeCommand(cmd, x, y):
+    #menulis command untuk gameengine
+    with open(os.path.join(gameengine_path, commandFile), 'w') as f_out:
         f_out.write('{},{},{}'.format(cmd, x, y))
         f_out.write('\n')
     pass
 
-def check_special(opponent_map, Owner, shots):
+def checkSpecial(opponent_map, Owner, shots):
+    #Mengecek dan mengembalikan command+kordinat tembakan jika bisa Melakukan
+    #special shot
     if Owner['Energy']>=(8*epr) and not(Owner['Ships'][1]['Destroyed']) :
         if shots[0][0]==shots[1][0] and abs(shots[0][1]-shots[1][1])==2:
             x = shots[0][0]
@@ -114,7 +120,7 @@ def check_special(opponent_map, Owner, shots):
                 x = shots[0][0]+1
             return (3,x,y)
     if Owner['Energy']>=(10*epr) and not(Owner['Ships'][3]['Destroyed']):
-        if (map_size==7):
+        if (mapsize==7):
             if (shots[0][0]+shots[0][1])%2==0:
                 return (4,shots[0][0],shots[0][1])
         else:
@@ -122,10 +128,9 @@ def check_special(opponent_map, Owner, shots):
                 return (4,shots[0][0],shots[0][1])
     return (0,0,0)
 
-def fire_shot(opponent_map, Owner):
-    # To send through a command please pass through the following <code>,<x>,<y>
-    # Possible codes: 1 - Fireshot, 0 - Do Nothing (please pass through coordinates if
-    #  code 1 is your choice)
+def shotCommand(opponent_map, Owner):
+    #Melakukan command shot
+
     with open('shots.txt', 'r') as f:
         shots = [tuple(map(int, shot.split(','))) for shot in f]
 
@@ -136,7 +141,7 @@ def fire_shot(opponent_map, Owner):
         if (cell['Missed']):
             shots.remove(shot)
         elif cell['Damaged']:
-            if (shot[1]+1 != map_size):
+            if (shot[1]+1 != mapsize):
                 myCell = searchCell(opponent_map, shot[0], shot[1]+1)
                 if (not(myCell['Damaged']) and not(myCell['Missed'])):
                     myShot = shot[0],shot[1]+1
@@ -151,16 +156,17 @@ def fire_shot(opponent_map, Owner):
                 if (not(myCell['Damaged']) and not(myCell['Missed'])):
                     myShot = shot[0]-1,shot[1]
                     shots.insert(0,myShot)
-            if (shot[0]+1 != map_size):
+            if (shot[0]+1 != mapsize):
                 myCell = searchCell(opponent_map, shot[0]+1, shot[1])
                 if (not(myCell['Damaged']) and not(myCell['Missed'])):
                     myShot = shot[0]+1,shot[1]
                     shots.insert(0,myShot)
             shots.remove(shot)
 
-    tryspecial = check_special(opponent_map, Owner, shots)
+    #Command utama (Menembak)
+    tryspecial = checkSpecial(opponent_map, Owner, shots)
     if tryspecial!=(0,0,0):
-        output_shot(tryshot[0],tryshot[1],tryshot[2])
+        writeCommand(tryspecial[0],tryspecial[1],tryspecial[2])
     else:
         #Menembak single shot
         i = 0
@@ -179,10 +185,11 @@ def fire_shot(opponent_map, Owner):
 
         if check :
             target = shots[i]
-            output_shot(1,shots[i][0],shots[i][1])
+            writeCommand(1,shots[i][0],shots[i][1])
         else:
-            output_shot(0,0,0)
+            writeCommand(0,0,0)
 
+    #Mengupdate file eksternal shots.txt setelah diupdate dan melakukan command
     with open('shots.txt', 'w') as f:
         for shot in shots :
             f.write(str(shot[0]))
@@ -193,23 +200,22 @@ def fire_shot(opponent_map, Owner):
 
 
 def searchCell(opponent_map, x, y):
+    #mengembalikan cell dari state.json dimana x dan y ditemukan
     for cell in opponent_map:
         if ((cell['X']==x) and (cell['Y']==y)):
             return cell
 
-def place_ships():
-    # Please place your ships in the following format <Shipname> <x> <y> <direction>
-    # Ship names: Battleship, Cruiser, Carrier, Destroyer, Submarine
-    # Directions: north east south west
-
-    if (map_size == 7):
+def placeShips():
+    #Meletakan kapal untuk phase 1
+    #format : <jenis kapal> <x> <y> <Arah menghadap>
+    if (mapsize == 7):
         ships = ['Battleship 0 4 East',
                  'Carrier 6 2 north',
                  'Cruiser 1 0 north',
                  'Destroyer 1 6 East',
                  'Submarine 3 1 East'
                  ]
-    elif (map_size == 10):
+    elif (mapsize == 10):
         ships = ['Battleship 2 6 East',
                  'Carrier 8 4 north',
                  'Cruiser 1 2 north',
@@ -223,8 +229,8 @@ def place_ships():
                  'Destroyer 3 10 East',
                  'Submarine 9 2 East'
                  ]
-
-    with open(os.path.join(output_path, place_ship_file), 'w') as f_out:
+    #menuliskan list peletakan kapal ke gameengine
+    with open(os.path.join(gameengine_path, shipFile), 'w') as f_out:
         for ship in ships:
             f_out.write(ship)
             f_out.write('\n')
@@ -237,5 +243,5 @@ if __name__ == '__main__':
     parser.add_argument('WorkingDirectory', nargs='?', default=os.getcwd(), help='Directory for the current game files')
     args = parser.parse_args()
     assert (os.path.isdir(args.WorkingDirectory))
-    output_path = args.WorkingDirectory
+    gameengine_path = args.WorkingDirectory
     main(args.PlayerKey)
