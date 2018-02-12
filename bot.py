@@ -121,12 +121,44 @@ def checkSpecial(opponent_map, Owner, shots):
             return (3,x,y)
     if Owner['Energy']>=(10*epr) and not(Owner['Ships'][3]['Destroyed']):
         if (mapsize==7):
-            if (shots[0][0]+shots[0][1])%2==0:
+            if (shots[0][0]+shots[0][1])%2==0 and CrossWorth(shots,shots[0][0],shots[0][1])>=3:
                 return (4,shots[0][0],shots[0][1])
         else:
-            if (shots[0][0]+shots[0][1])%2==1:
+            if (shots[0][0]+shots[0][1])%2==1 and CrossWorth(shots,shots[0][0],shots[0][1])>=3:
                 return (4,shots[0][0],shots[0][1])
+    if Owner['Energy']>=(12*epr) and not(Owner['Ships'][2]['Destroyed']):
+        if (mapsize==7):
+            if (shots[0][0]+shots[0][1])%2==0 and CrossWorth(shots,shots[0][0],shots[0][1])>=2:
+                return (5,shots[0][0],shots[0][1])
+        else:
+            if (shots[0][0]+shots[0][1])%2==1 and CrossWorth(shots,shots[0][0],shots[0][1])>=2:
+                return (5,shots[0][0],shots[0][1])
+    if Owner['Energy']>=(10*epr) and (Owner['Ships'][3]['Destroyed']) and (Owner['Ships'][2]['Destroyed']) and not(Owner['Ships'][0]['Destroyed']):
+            if (mapsize==7):
+                if (shots[0][0]+shots[0][1])%2==0:
+                    return (7,shots[0][0],shots[0][1])
+            else:
+                if (shots[0][0]+shots[0][1])%2==1:
+                    return (7,shots[0][0],shots[0][1])
+    if Owner['Energy']>=(14*epr) and (Owner['Ships'][3]['Destroyed']) and (Owner['Ships'][2]['Destroyed']) and (Owner['Ships'][0]['Destroyed']) and (Owner['Ships'][1]['Destroyed']):
+        if not(Owner['Ships'][4]['Destroyed']):
+            return(6,shots[0][0],shots[0][1])
     return (0,0,0)
+
+def CrossWorth(shots,x, y):
+    #Mengembalikan jumlah petak silang dengan titik pusat(x,y) yang belum tertembak
+    N = 0
+    for cell in shots:
+        if (cell[0]==x+1 and cell[1]==y+1):
+            N += 1
+        if (cell[0]==x-1 and cell[1]==y+1):
+            N += 1
+        if (cell[0]==x+1 and cell[1]==y-1):
+            N += 1
+        if (cell[0]==x-1 and cell[1]==y-1):
+            N += 1
+    return N
+
 
 def shotCommand(opponent_map, Owner):
     #Melakukan command shot
